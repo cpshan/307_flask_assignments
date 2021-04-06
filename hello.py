@@ -18,11 +18,13 @@ def hello_world():
 def get_users():
 	if request.method == 'GET':
 		search_username = request.args.get('name')	#accessing the value of parameter 'name'
-		if search_username:							#looks like .../users?name=Mac
+		search_job = request.args.get('job')		#looks like .../users?name=Mac
+		if search_username:							
 			subdict = {'users_list' : []}
 			for user in users['users_list']:
 				if user['name'] == search_username:
-					subdict['users_list'].append(user)
+					if (not search_job) or (search_job and user['job'] == search_job):
+						subdict['users_list'].append(user)
 			return subdict
 		return users
 	elif request.method == 'POST':
