@@ -14,7 +14,7 @@ users = {'users_list' : [
 def hello_world():
 	return 'Hello, World!'
 
-@app.route('/users', methods=['GET', 'POST'])
+@app.route('/users', methods=['GET', 'POST', 'DELETE'])
 def get_users():
 	if request.method == 'GET':
 		search_username = request.args.get('name')	#accessing the value of parameter 'name'
@@ -30,6 +30,11 @@ def get_users():
 		users['users_list'].append(userToAdd)
 		resp = jsonify(success=True)
 		return resp		#forgot this at first
+	elif request.method == 'DELETE':
+		userToDelete = request.get_json()
+		users['users_list'].remove(userToDelete)
+		resp = jsonify(success=True)
+		return resp
 
 @app.route('/users/<id>')
 def get_user(id):
