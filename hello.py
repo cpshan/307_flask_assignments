@@ -1,5 +1,6 @@
 from flask import Flask
 from flask import request
+from flask import jsonify
 app = Flask(__name__)
 
 users = {'users_list' : [
@@ -13,16 +14,22 @@ users = {'users_list' : [
 def hello_world():
 	return 'Hello, World!'
 
-@app.route('/users')
+@app.route('/users', methods=['GET', 'POST'])
 def get_users():
-	search_username = request.args.get('name')	#accessing the value of parameter 'name'
-	if search_username:							#looks like .../users?name=Mac
-		subdict = {'users_list' : []}
-		for user in users['users_list']:
-			if user['name'] == search_username:
-				subdict['users_list'].append(user)
-		return subdict
-	return users
+	if request.method == 'GET':
+		search_username = request.args.get('name')	#accessing the value of parameter 'name'
+		if search_username:							#looks like .../users?name=Mac
+			subdict = {'users_list' : []}
+			for user in users['users_list']:
+				if user['name'] == search_username:
+					subdict['users_list'].append(user)
+			return subdict
+		return users
+	elif request.method == 'POST':
+		userToAdd = request.get_json()
+		users['users_list'].append(userToAdd)
+		resp = jsonify(success=True)
+		return resp		#forgot this at first
 
 @app.route('/users/<id>')
 def get_user(id):
