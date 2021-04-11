@@ -12,7 +12,7 @@ users = {'users_list' : [
 	{'id' : 'abc123', 'name' : 'Mac', 'job' : 'Bouncer'},
 	{'id' : 'ppp222', 'name' : 'Mac', 'job' : 'Professor'},
 	{'id' : 'yat999', 'name' : 'Dee', 'job' : 'Aspiriing Actress'},
-	{'id' : 'zap555', 'name' : 'Denni', 'job' : 'Bartender'}]}
+	{'id' : 'zap555', 'name' : 'Dennis', 'job' : 'Bartender'}]}
 
 @app.route('/')
 def hello_world():
@@ -33,26 +33,43 @@ def get_users():
 		return users
 	elif request.method == 'POST':
 		userToAdd = request.get_json()
-		userToAdd['id'] = generateID()
+		userToAdd['id'] = random.choice(string.ascii_letters) + random.choice(string.ascii_letters) + random.choice(string.ascii_letters)\
+							+ str(random.randrange(0, 9)) + str(random.randrange(0, 9)) + str(random.randrange(0, 9))
 		users['users_list'].append(userToAdd)
 		resp = jsonify(success=True)
 		resp.status_code = 201
-		return resp		#forgot this at first
+		return userToAdd
 	elif request.method == 'DELETE':
 		userToDelete = request.get_json()
-		users['users_list'].remove(userToDelete)
-		resp = jsonify(success=True)
+		resp = jsonify(success=False)
+		try:
+			users['users_list'].remove(userToDelete)
+			resp = jsonify(success=True)
+			resp.status_code = 204
+		except ValueError:
+			resp.status_code = 404
 		return resp
 
-@app.route('/users/<id>')
+@app.route('/users/<id>', methods=['GET', 'DELETE'])
 def get_user(id):
-	if id:
-		for user in users['users_list']:
-			if user['id'] == id:
-				return user
-		return ({})
-	return users
-
-def generateID():
-	return random.choice(string.ascii_letters) + random.choice(string.ascii_letters) + random.choice(string.ascii_letters)\
-	+ str(random.randrange(0, 9)) + str(random.randrange(0, 9)) + str(random.randrange(0, 9))
+	if request.method == 'GET':
+		if id:
+			for user in users['users_list']:
+				if user['id'] == id:
+					return user
+			return ({})
+		return users	
+	elif request.method == 'DELETE':
+		resp = jsonify(success=False)
+		userToDelete = None
+		if id:
+			for user in users['users_list']:
+				if user['id'] == id:
+					userToDelete = user
+		try:
+			users['users_list'].remove(userToDelete)
+			resp = jsonify(success=True)
+			resp.status_code = 204
+		except ValueError:
+			resp.status_code = 404
+		return resp
